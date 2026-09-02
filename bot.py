@@ -90,7 +90,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     welcome_text = (
-        "🌿 <b>枯叶话费查询 Bot</b>\n\n"
+        "🌿 <b>贝贝查询 Bot</b>\n\n"
         "📌 <b>使用方法</b>：\n"
         "• 直接发送 <b>11位手机号</b> 即可查询余额\n"
         "• 支持批量查询，每行一个手机号\n\n"
