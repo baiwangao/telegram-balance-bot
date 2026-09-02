@@ -48,6 +48,8 @@ def query_unicom_balance(phone_number: str):
 
     try:
         resp = requests.post(UNICOM_API_URL, headers=headers, data=post_data, timeout=15)
+        logger.info(f"API 响应状态码: {resp.status_code}")
+        logger.info(f"API 原始响应: {resp.text}")
         res_json = resp.json()
 
         if res_json.get("code") == 1:
