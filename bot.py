@@ -1,6 +1,9 @@
 import os
+import time
+import threading
 import requests
 import logging
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes, CallbackQueryHandler
 
@@ -196,6 +199,26 @@ async def error_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update and update.effective_message:
         await update.effective_message.reply_text("⚠️ 发生错误，请稍后再试")
 
+# ===================== 健康检查服务 =====================
+class HealthHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.send_header("Content-Type", "text/plain; charset=utf-8")
+        self.end_headers()
+        self.wfile.write("Bot is running".encode("utf-8"))
+
+    def log_message(self, format, *args):
+        logger.info(f"健康检查: {self.address_string()} {format % args}")
+
+def start_health_server():
+    port = int(os.environ.get("PORT", 10000))
+    try:
+        server = ThreadingHTTPServer(("0.0.0.0", port), HealthHandler)
+        threading.Thread(target=server.serve_forever, daemon=True).start()
+        logger.info(f"✅ 健康检查服务已启动，监听端口 {port}")
+    except OSError as e:
+        logger.warning(f"⚠️ 端口 {port} 启动失败: {e}")
+
 # ===================== 主程序 =====================
 def main():
     # 从环境变量读取 Token
@@ -205,6 +228,9 @@ def main():
         print("❌ 错误：未设置 TELEGRAM_BOT_TOKEN 环境变量")
         print("请在 Render 的 Environment Variables 中设置")
         return
+
+    # Render Web Service 要求监听 $PORT，否则判定部署超时
+    start_health_server()
 
     app = Application.builder().token(BOT_TOKEN).build()
 
@@ -216,7 +242,7 @@ def main():
     app.add_error_handler(error_handler)
 
     print("🤖 Bot 已启动，正在监听消息...")
-    app.run_polling(allowed_updates=Update.ALL_TYPES)
+    app.run_polling(allowed_updates=Update.ALL_TYPES, drop_pending_updates=True)
 
 if __name__ == "__main__":
     main()
