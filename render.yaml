@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: telegram-balance-bot
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: python bot.py
+    envVars:
+      - key: TELEGRAM_BOT_TOKEN
+        value: 8826963365:AAEP4_yNIS6XFvQQ2EetOCjBl3lRUnyEMXo
+      - key: STRESS_TEST_ADMIN_IDS
+        sync: false
+    region: singapore
