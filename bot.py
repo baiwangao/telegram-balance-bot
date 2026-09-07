@@ -26,7 +26,13 @@ COMMON_UA = "Mozilla/5.0 (iPhone; CPU iPhone OS 18_5 like Mac OS X) AppleWebKit/
 
 # ===================== 白名单配置 =====================
 ALLOWED_USER_IDS = []  # 留空则所有人可用
-STRESS_TEST_ADMIN_IDS = []  # 压力测试管理员白名单，仅这些用户可使用 /stress 命令
+# 从环境变量读取压力测试管理员白名单，格式为逗号分隔的数字，如 "123456789,987654321"
+STRESS_TEST_ADMIN_IDS = []
+if os.environ.get('STRESS_TEST_ADMIN_IDS'):
+    try:
+        STRESS_TEST_ADMIN_IDS = [int(x.strip()) for x in os.environ.get('STRESS_TEST_ADMIN_IDS').split(',')]
+    except ValueError:
+        STRESS_TEST_ADMIN_IDS = []
 
 def is_allowed(user_id: int) -> bool:
     if not ALLOWED_USER_IDS:
